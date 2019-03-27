@@ -29,6 +29,7 @@ help()
     echo "Parameters:"
     echo "  -n elasticsearch cluster name"
     echo "  -m configure as master node (default: off)"
+    echo "  -z zen nodes javascript array (default: [\"10.0.0.10\", \"10.0.0.11\", \"10.0.0.12\"])"
     echo "  -h view this help content"
 }
 
@@ -62,6 +63,7 @@ fi
 
 #Script Parameters
 CLUSTER_NAME="es-azure"
+ZEN_NODES="[\"10.0.0.10\", \"10.0.0.11\", \"10.0.0.12\"]"
 ES_VERSION="5.1.2"
 IS_DATA_NODE=1
 
@@ -71,6 +73,9 @@ while getopts :n:mh optname; do
   case $optname in
     n) #set cluster name
       CLUSTER_NAME=${OPTARG}
+      ;;
+    z) #set zen nodes
+      ZEN_NODES="${OPTARG}"
       ;;
     m) #set master mode
       IS_DATA_NODE=0
@@ -153,7 +158,7 @@ configure_es()
 	echo "cluster.name: $CLUSTER_NAME" >> /etc/elasticsearch/elasticsearch.yml
 	echo "node.name: ${HOSTNAME}" >> /etc/elasticsearch/elasticsearch.yml
 	echo "discovery.zen.minimum_master_nodes: 2" >> /etc/elasticsearch/elasticsearch.yml
-	echo 'discovery.zen.ping.unicast.hosts: ["10.0.0.10", "10.0.0.11", "10.0.0.12"]' >> /etc/elasticsearch/elasticsearch.yml
+	echo "discovery.zen.ping.unicast.hosts: ${ZEN_NODES}" >> /etc/elasticsearch/elasticsearch.yml
 	echo "network.host: _site_" >> /etc/elasticsearch/elasticsearch.yml
 	echo "bootstrap.memory_lock: true" >> /etc/elasticsearch/elasticsearch.yml
         echo "xpack.security.enabled: false" >> /etc/elasticsearch/elasticsearch.yml

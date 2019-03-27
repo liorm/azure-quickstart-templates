@@ -29,7 +29,7 @@ help()
     echo "Parameters:"
     echo "  -n elasticsearch cluster name"
     echo "  -m configure as master node (default: off)"
-    echo "  -z zen nodes javascript array (default: [\"10.0.0.10\", \"10.0.0.11\", \"10.0.0.12\"])"
+    echo "  -z zen nodes yml array (default: [\"10.0.0.10\", \"10.0.0.11\", \"10.0.0.12\"])"
     echo "  -h view this help content"
 }
 
@@ -68,7 +68,7 @@ ES_VERSION="5.1.2"
 IS_DATA_NODE=1
 
 #Loop through options passed
-while getopts :n:mh optname; do
+while getopts :n:z:mh optname; do
   log "Option $optname set with value ${OPTARG}"
   case $optname in
     n) #set cluster name

@@ -209,7 +209,7 @@ configure_system()
             wget -q $DOWNLOAD_SCRIPT
         fi
         
-        bash ./vm-disk-utils-0.1.sh
+        bash ./vm-disk-utils-0.1.sh -s
         if [ $? -eq 0 ] && [ -d "$DATA_DIR" ];
         then
             log "Disk setup successful, using $DATA_DIR"

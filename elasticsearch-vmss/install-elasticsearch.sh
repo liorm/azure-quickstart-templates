@@ -160,8 +160,9 @@ configure_es()
 	echo "discovery.zen.minimum_master_nodes: 2" >> /etc/elasticsearch/elasticsearch.yml
 	echo "discovery.zen.ping.unicast.hosts: ${ZEN_NODES}" >> /etc/elasticsearch/elasticsearch.yml
 
-	echo "discovery.seed_hosts: ${ZEN_NODES}" >> /etc/elasticsearch/elasticsearch.yml
-	echo "cluster.initial_master_nodes: ${ZEN_NODES}" >> /etc/elasticsearch/elasticsearch.yml
+	# LM: For ES7 - disabled for now
+	#echo "discovery.seed_hosts: ${ZEN_NODES}" >> /etc/elasticsearch/elasticsearch.yml
+	#echo "cluster.initial_master_nodes: ${ZEN_NODES}" >> /etc/elasticsearch/elasticsearch.yml
 	
 	echo "network.host: _site_" >> /etc/elasticsearch/elasticsearch.yml
 	echo "bootstrap.memory_lock: true" >> /etc/elasticsearch/elasticsearch.yml

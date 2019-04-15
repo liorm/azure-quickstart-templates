@@ -158,6 +158,7 @@ configure_es()
 	echo "cluster.name: $CLUSTER_NAME" >> /etc/elasticsearch/elasticsearch.yml
 	echo "node.name: ${HOSTNAME}" >> /etc/elasticsearch/elasticsearch.yml
 	echo "discovery.seed_hosts: ${ZEN_NODES}" >> /etc/elasticsearch/elasticsearch.yml
+	echo "cluster.initial_master_nodes: ${ZEN_NODES}" >> /etc/elasticsearch/elasticsearch.yml
 	echo "network.host: _site_" >> /etc/elasticsearch/elasticsearch.yml
 	echo "bootstrap.memory_lock: true" >> /etc/elasticsearch/elasticsearch.yml
         echo "xpack.security.enabled: false" >> /etc/elasticsearch/elasticsearch.yml

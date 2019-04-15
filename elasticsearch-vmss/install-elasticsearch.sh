@@ -217,17 +217,22 @@ configure_system()
             log "Disk setup script not found in `pwd`, download from $DOWNLOAD_SCRIPT"
             wget -q $DOWNLOAD_SCRIPT
         fi
-        
-        bash ./vm-disk-utils-0.1.sh -s
-        if [ $? -eq 0 ] && [ -d "$DATA_DIR" ];
-        then
-            log "Disk setup successful, using $DATA_DIR"
-            chown -R elasticsearch:elasticsearch $DATA_DIR
-            echo "DATA_DIR=$DATA_DIR" >> /etc/default/elasticsearch
-	    echo "path.data: $DATA_DIR" >> /etc/elasticsearch/elasticsearch.yml
-        else
-            log "Disk setup failed, using default data storage location"
-        fi
+
+    	if mount | grep $DATA_DIR > /dev/null; 
+	then 
+	    echo "$DATA_DIR already formatted and mounted"
+	else
+            bash ./vm-disk-utils-0.1.sh -s
+	    if [ $? -eq 0 ] && [ -d "$DATA_DIR" ];
+	    then
+	        log "Disk setup successful, using $DATA_DIR"
+                chown -R elasticsearch:elasticsearch $DATA_DIR
+		echo "DATA_DIR=$DATA_DIR" >> /etc/default/elasticsearch
+		echo "path.data: $DATA_DIR" >> /etc/elasticsearch/elasticsearch.yml
+	    else
+		log "Disk setup failed, using default data storage location"
+	    fi
+	fi
     fi
 }
 

@@ -144,7 +144,7 @@ install_es()
     
     if [ ${IS_DATA_NODE} -eq 0 ]; 
     then
-        apt-get install -y kibana
+        apt-get install -y kibana libnss3 libgles2-mesa-dev fontconfig
         pushd /usr/share/kibana/
         bin/kibana-plugin install x-pack
         popd
@@ -157,11 +157,11 @@ configure_es()
 	mv /etc/elasticsearch/elasticsearch.yml /etc/elasticsearch/elasticsearch.bak
 	echo "cluster.name: $CLUSTER_NAME" >> /etc/elasticsearch/elasticsearch.yml
 	echo "node.name: ${HOSTNAME}" >> /etc/elasticsearch/elasticsearch.yml
-	echo "discovery.zen.minimum_master_nodes: 2" >> /etc/elasticsearch/elasticsearch.yml
-	echo "discovery.zen.ping.unicast.hosts: ${ZEN_NODES}" >> /etc/elasticsearch/elasticsearch.yml
+	echo "discovery.seed_hosts: ${ZEN_NODES}" >> /etc/elasticsearch/elasticsearch.yml
 	echo "network.host: _site_" >> /etc/elasticsearch/elasticsearch.yml
 	echo "bootstrap.memory_lock: true" >> /etc/elasticsearch/elasticsearch.yml
         echo "xpack.security.enabled: false" >> /etc/elasticsearch/elasticsearch.yml
+	echo "xpack.license.self_generated.type: basic" >> /etc/elasticsearch/elasticsearch.yml
 
 	if [ ${IS_DATA_NODE} -eq 1 ]; then
 	    echo "node.master: false" >> /etc/elasticsearch/elasticsearch.yml
@@ -198,6 +198,8 @@ configure_system()
         echo "server.host: \"$IP_ADDRESS\"" >> /etc/kibana/kibana.yml
 	echo "elasticsearch.hosts: [\"http://$IP_ADDRESS:9200\"]" >> /etc/kibana/kibana.yml
         echo "xpack.security.enabled: false" >> /etc/kibana/kibana.yml
+        echo "xpack.reporting.enabled: false" >> /etc/kibana/kibana.yml
+	
         chown -R kibana:kibana /usr/share/kibana
     else
         # data disk

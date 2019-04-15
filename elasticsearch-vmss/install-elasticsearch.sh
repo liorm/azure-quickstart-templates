@@ -64,7 +64,7 @@ fi
 #Script Parameters
 CLUSTER_NAME="es-azure"
 ZEN_NODES="[\"10.0.0.10\", \"10.0.0.11\", \"10.0.0.12\"]"
-ES_VERSION="7.0.0"
+ES_VERSION="6.7.1"
 IS_DATA_NODE=1
 
 #Loop through options passed
@@ -135,7 +135,7 @@ install_es()
 {
     wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | apt-key add -
     apt-get install -y apt-transport-https
-    echo "deb https://artifacts.elastic.co/packages/7.x/apt stable main" | tee -a /etc/apt/sources.list.d/elastic-7.x.list
+    echo "deb https://artifacts.elastic.co/packages/6.x/apt stable main" | tee -a /etc/apt/sources.list.d/elastic-6.x.list
     apt-get update -y
     apt-get install -y elasticsearch
     pushd /usr/share/elasticsearch/
@@ -157,19 +157,26 @@ configure_es()
 	mv /etc/elasticsearch/elasticsearch.yml /etc/elasticsearch/elasticsearch.bak
 	echo "cluster.name: $CLUSTER_NAME" >> /etc/elasticsearch/elasticsearch.yml
 	echo "node.name: ${HOSTNAME}" >> /etc/elasticsearch/elasticsearch.yml
+	echo "discovery.zen.minimum_master_nodes: 2" >> /etc/elasticsearch/elasticsearch.yml
+	echo "discovery.zen.ping.unicast.hosts: ${ZEN_NODES}" >> /etc/elasticsearch/elasticsearch.yml
+
 	echo "discovery.seed_hosts: ${ZEN_NODES}" >> /etc/elasticsearch/elasticsearch.yml
 	echo "cluster.initial_master_nodes: ${ZEN_NODES}" >> /etc/elasticsearch/elasticsearch.yml
+	
 	echo "network.host: _site_" >> /etc/elasticsearch/elasticsearch.yml
 	echo "bootstrap.memory_lock: true" >> /etc/elasticsearch/elasticsearch.yml
         echo "xpack.security.enabled: false" >> /etc/elasticsearch/elasticsearch.yml
 	echo "xpack.license.self_generated.type: basic" >> /etc/elasticsearch/elasticsearch.yml
+	echo "path.logs: /var/log/elasticsearch" >> /etc/elasticsearch/elasticsearch.yml
 
 	if [ ${IS_DATA_NODE} -eq 1 ]; then
 	    echo "node.master: false" >> /etc/elasticsearch/elasticsearch.yml
 	    echo "node.data: true" >> /etc/elasticsearch/elasticsearch.yml
+	    echo "node.ingest: true" >> /etc/elasticsearch/elasticsearch.yml
 	else
-        echo "node.master: true" >> /etc/elasticsearch/elasticsearch.yml
-        echo "node.data: false" >> /etc/elasticsearch/elasticsearch.yml
+	    echo "node.master: true" >> /etc/elasticsearch/elasticsearch.yml
+	    echo "node.data: false" >> /etc/elasticsearch/elasticsearch.yml
+	    echo "node.ingest: false" >> /etc/elasticsearch/elasticsearch.yml
 	fi
 }
 
@@ -199,7 +206,6 @@ configure_system()
         echo "server.host: \"$IP_ADDRESS\"" >> /etc/kibana/kibana.yml
 	echo "elasticsearch.hosts: [\"http://$IP_ADDRESS:9200\"]" >> /etc/kibana/kibana.yml
         echo "xpack.security.enabled: false" >> /etc/kibana/kibana.yml
-        echo "xpack.reporting.enabled: false" >> /etc/kibana/kibana.yml
 	
         chown -R kibana:kibana /usr/share/kibana
     else
@@ -218,6 +224,7 @@ configure_system()
             log "Disk setup successful, using $DATA_DIR"
             chown -R elasticsearch:elasticsearch $DATA_DIR
             echo "DATA_DIR=$DATA_DIR" >> /etc/default/elasticsearch
+	    echo "path.data: $DATA_DIR" >> /etc/elasticsearch/elasticsearch.yml
         else
             log "Disk setup failed, using default data storage location"
         fi
@@ -255,8 +262,7 @@ start_service()
 
 log "starting elasticsearch setup"
 
-#LM: ES 7 comes with java bundled.
-#install_java
+install_java
 install_es
 configure_es
 configure_system
